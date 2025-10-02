@@ -1,4 +1,5 @@
-module github.com/chainreactors/neutron
+module github.com/ruisika/neutron
+
 
 go 1.11
 
