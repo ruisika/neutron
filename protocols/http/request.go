@@ -478,7 +478,8 @@ func (r *Request) responseToDSLMap(req *http.Request, resp *http.Response, host,
 	data["type"] = r.Type().String()
 	data["matched"] = matched
 	data["status_code"] = resp.StatusCode
-	data["duration"] = fmt.Sprintf("%.2fs", duration.Seconds())
+	data["duration"] = duration.Seconds()
+	data["durationstring"] = fmt.Sprintf("%.2f", duration.Seconds())
 	var respRaw bytes.Buffer
 	respRaw.WriteString(fmt.Sprintf("%s %s\r\n", resp.Proto, resp.Status))
 	for k, v := range resp.Header {

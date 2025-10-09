@@ -10,6 +10,8 @@ github.com/chainreactors/files v0.0.0-20231102192550-a652458cee26 h1:p+RrnAjk2Es
 github.com/chainreactors/files v0.0.0-20231102192550-a652458cee26/go.mod h1:/Xa9YXhjBlaC33JTD6ZTJFig6pcplak2IDcovf42/6A=
 github.com/chainreactors/logs v0.0.0-20241030063019-8ca66a3ee307 h1:gZuBqpqwbn9WR8f/vfn8lf6tjeWcM+ajLXAL3SkOtQs=
 github.com/chainreactors/logs v0.0.0-20241030063019-8ca66a3ee307/go.mod h1:6Mv6W70JrtL6VClulZhmMRZnoYpcTahcDTKLMNEjK0o=
+github.com/chainreactors/neutron v0.0.1 h1:3FBtqORuCfAzeo5I+Ur004F1kMDPsuH78bwAGRLCMJ8=
+github.com/chainreactors/neutron v0.0.1/go.mod h1:fvrw6Z8gXqYkZVIjl04HBoQ7LW7ptiBcUBXxJZWn0n0=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -19,10 +21,14 @@ github.com/hashicorp/go-version v1.6.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09
 github.com/invopop/jsonschema v0.13.0 h1:KvpoAJWEjR3uD9Kbm2HWJmqsEaHt8lBUpd0qHcIi21E=
 github.com/invopop/jsonschema v0.13.0/go.mod h1:ffZ5Km5SWWRAIN6wbDXItl95euhFz2uON45H2qjYt+0=
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
+github.com/lcvvvv/logs v0.0.3 h1:5cuH/GnJANnUAMHoA8p/3ryTlYzhxdk4cZ0d+YZPgHE=
+github.com/lcvvvv/logs v0.0.3/go.mod h1:C94n/NhKNNzhUnWIl2XlDO0tpSPStUXNm4QuVoK1Mo4=
 github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0=
 github.com/mailru/easyjson v0.7.7/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/ruisika/neutron v0.0.0-20251005105838-f9b555a5f71c h1:sWXewuoydyOwJ4dngXLasOIveTCthUVuVDDdGNuKvRI=
+github.com/ruisika/neutron v0.0.0-20251005105838-f9b555a5f71c/go.mod h1:Qz4+3fvZcuyv3Ca8uxfZeP6Rig2vDGxaYdFipQIKHIg=
 github.com/spaolacci/murmur3 v1.1.0 h1:7c1g84S4BPRrfL5Xrdp6fOJ206sU9y293DDHaoy0bLI=
 github.com/spaolacci/murmur3 v1.1.0/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

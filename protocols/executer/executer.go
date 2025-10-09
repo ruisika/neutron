@@ -1,6 +1,7 @@
 package executer
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strconv"
 	"strings"
@@ -62,16 +63,38 @@ func (e *Executer) Execute(input *protocols.ScanContext) (*operators.Result, err
 	for _, req := range e.requests {
 		err := req.ExecuteWithResults(input, dynamicValues, previous, func(event *protocols.InternalWrappedEvent) {
 			events = append(events, *event)
+			lenevents := len(events)
+
 			if event.OperatorsResult != nil {
 				result = event.OperatorsResult
-				resss := []map[string]interface{}{}
-				for i, wrappedEvent := range events {
-					resss = append(resss, map[string]interface{}{
-						"req" + strconv.Itoa(i): ReconstructHTTPPacket(wrappedEvent.InternalEvent),
-					})
+				// 初始化 Payloadreqresp map 如果为 nil
+				if result.Payloadreqresp == nil {
+					result.Payloadreqresp = make(map[string]interface{})
 				}
-				result.PayloadValues = map[string]interface{}{"payload_values": resss}
+
+				// 如果事件数量大于5，只取最后5个事件
+				var eventsToProcess []protocols.InternalWrappedEvent
+				if lenevents > 5 {
+					eventsToProcess = events[lenevents-5:]
+				} else {
+					eventsToProcess = events
+				}
+
+				// 清空之前的请求数据，重新填充
+				for i := 0; i < 5; i++ {
+					delete(result.Payloadreqresp, "req"+strconv.Itoa(i))
+				}
+
+				// 只保存最后5个事件，命名为 req0-req4
+				for i, wrappedEvent := range eventsToProcess {
+					result.Payloadreqresp["req"+strconv.Itoa(i)] = ReconstructHTTPPacket(wrappedEvent.InternalEvent)
+				}
+
+				if len(result.Payloadreqresp) > 0 {
+					result.Payloadreqresp["url"] = event.InternalEvent["host"]
+				}
 			}
+
 		})
 		if err != nil {
 			return nil, err
@@ -91,8 +114,8 @@ type HTTPPacketResult struct {
 // 它只依赖于你提供的特定字段。
 func ReconstructHTTPPacket(event map[string]interface{}) HTTPPacketResult {
 	executionTime := ""
-	if event["duration"] != nil {
-		executionTime = event["duration"].(string)
+	if event["durationstring"] != nil {
+		executionTime = event["durationstring"].(string)
 	}
 	result := HTTPPacketResult{
 		RequestPacket:  "Error: Request packet could not be reconstructed.",
@@ -127,7 +150,7 @@ func ReconstructHTTPPacket(event map[string]interface{}) HTTPPacketResult {
 			requestBuilder.WriteString("\r\n\r\n")
 		}
 
-		result.RequestPacket = requestBuilder.String()
+		result.RequestPacket = base64.StdEncoding.EncodeToString([]byte(requestBuilder.String()))
 	}
 
 	// --- 2. 还原响应包 (Response Packet) ---
@@ -170,8 +193,8 @@ func ReconstructHTTPPacket(event map[string]interface{}) HTTPPacketResult {
 			// 响应体
 			responseBuilder.WriteString(strings.TrimSpace(responseBody))
 		}
+		result.ResponsePacket = base64.StdEncoding.EncodeToString([]byte(responseBuilder.String()))
 
-		result.ResponsePacket = responseBuilder.String()
 	}
 
 	return result

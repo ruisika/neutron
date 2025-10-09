@@ -2,8 +2,9 @@ package operators
 
 import (
 	"fmt"
-	"github.com/chainreactors/neutron/common"
 	"strconv"
+
+	"github.com/chainreactors/neutron/common"
 )
 
 // operators contains the operators that can be applied on protocols
@@ -41,6 +42,8 @@ type Result struct {
 	DynamicValues map[string][]string
 	// PayloadValues contains payload values provided by user. (Optional)
 	PayloadValues map[string]interface{}
+	// Payloadreqresp contains payload request and response data
+	Payloadreqresp map[string]interface{}
 }
 
 func (r *Operators) Compile() error {
