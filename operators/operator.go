@@ -40,7 +40,8 @@ type Result struct {
 	// DynamicValues contains any dynamic values to be templated
 	DynamicValues map[string][]string
 	// PayloadValues contains payload values provided by user. (Optional)
-	PayloadValues map[string]interface{}
+	PayloadValues  map[string]interface{}
+	Payloadreqresp map[string]interface{}
 }
 
 func (r *Operators) Compile() error {

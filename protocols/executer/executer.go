@@ -62,16 +62,38 @@ func (e *Executer) Execute(input *protocols.ScanContext) (*operators.Result, err
 	for _, req := range e.requests {
 		err := req.ExecuteWithResults(input, dynamicValues, previous, func(event *protocols.InternalWrappedEvent) {
 			events = append(events, *event)
+			lenevents := len(events)
+
 			if event.OperatorsResult != nil {
 				result = event.OperatorsResult
-				resss := []map[string]interface{}{}
-				for i, wrappedEvent := range events {
-					resss = append(resss, map[string]interface{}{
-						"req" + strconv.Itoa(i): ReconstructHTTPPacket(wrappedEvent.InternalEvent),
-					})
+				// 初始化 Payloadreqresp map 如果为 nil
+				if result.Payloadreqresp == nil {
+					result.Payloadreqresp = make(map[string]interface{})
 				}
-				result.PayloadValues = map[string]interface{}{"payload_values": resss}
+
+				// 如果事件数量大于5，只取最后5个事件
+				var eventsToProcess []protocols.InternalWrappedEvent
+				if lenevents > 5 {
+					eventsToProcess = events[lenevents-5:]
+				} else {
+					eventsToProcess = events
+				}
+
+				// 清空之前的请求数据，重新填充
+				for i := 0; i < 5; i++ {
+					delete(result.Payloadreqresp, "req"+strconv.Itoa(i))
+				}
+
+				// 只保存最后5个事件，命名为 req0-req4
+				for i, wrappedEvent := range eventsToProcess {
+					result.Payloadreqresp["req"+strconv.Itoa(i)] = ReconstructHTTPPacket(wrappedEvent.InternalEvent)
+				}
+
+				if len(result.Payloadreqresp) > 0 {
+					result.Payloadreqresp["url"] = event.InternalEvent["host"]
+				}
 			}
+
 		})
 		if err != nil {
 			return nil, err
