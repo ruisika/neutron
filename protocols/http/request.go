@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -319,6 +320,7 @@ func (r *Request) ExecuteWithResults(input *protocols.ScanContext, dynamicValues
 
 func (r *Request) ExecuteRequestWithResults(input *protocols.ScanContext, dynamicValues, previous map[string]interface{}, callback protocols.OutputEventCallback) error {
 	variablesMap := r.options.Variables.Evaluate(common.MergeMaps(dynamicValues, previous))
+	fmt.Println(dynamicValues)
 	dynamicValues = common.MergeMaps(variablesMap, dynamicValues)
 	generator := r.newGenerator(input.Payloads)
 	requestCount := 1
@@ -374,6 +376,19 @@ func (r *Request) ExecuteRequestWithResults(input *protocols.ScanContext, dynami
 		}
 		var gotErr error
 		var skip bool
+		sleepTime := 0
+
+		//判断是否有睡眠时长
+		if strings.Contains(inputData, "xxtimex") {
+			re := regexp.MustCompile(`xxtimex(\d+)`)
+			match := re.FindStringSubmatch(inputData)
+			if len(match) > 0 {
+				sleepTime, _ = strconv.Atoi(match[1])
+			}
+		}
+		if sleepTime > 20 {
+			sleepTime = 20
+		}
 
 		if len(gotDynamicValues) > 0 {
 			operators.MakeDynamicValuesCallback(gotDynamicValues, r.IterateAll, func(data map[string]interface{}) bool {
@@ -388,6 +403,7 @@ func (r *Request) ExecuteRequestWithResults(input *protocols.ScanContext, dynami
 		if gotErr != nil && requestErr == nil {
 			requestErr = gotErr
 		}
+		time.Sleep(time.Duration(sleepTime) * time.Second)
 		if skip || gotErr != nil {
 			break
 		}
@@ -406,15 +422,16 @@ func (r *Request) executeRequest(input *protocols.ScanContext, request *generate
 			request.request.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
 		}
 	}
-
 	resp, err := r.httpClient.Do(request.request)
-	request.request.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
-	common.Debug("request %s %v %v", request.request.Method, request.request.URL, request.dynamicValues)
-	common.Dump(request.request)
 	if err != nil {
 		common.Debug("%s nuclei request failed, %s", request.request.URL, err.Error())
 		return err
 	}
+
+	request.request.Body = ioutil.NopCloser(bytes.NewBuffer(requestBody))
+	common.Debug("request %s %v %v", request.request.Method, request.request.URL, request.dynamicValues)
+	common.Dump(request.request)
+
 	duration := time.Since(timeStart)
 	matchedURL := input.Input
 	if request.request != nil {
@@ -428,6 +445,7 @@ func (r *Request) executeRequest(input *protocols.ScanContext, request *generate
 	}
 	finalEvent := make(map[string]interface{})
 	outputEvent := r.responseToDSLMap(request.request, resp, input.Input, matchedURL, duration, request.dynamicValues)
+
 	for k, v := range previousEvent {
 		finalEvent[k] = v
 	}
@@ -447,7 +465,6 @@ func (r *Request) executeRequest(input *protocols.ScanContext, request *generate
 	common.Dump(finalEvent)
 
 	event := &protocols.InternalWrappedEvent{InternalEvent: finalEvent}
-	//fmt.Println(event)
 	if r.CompiledOperators != nil {
 		var ok bool
 		event.OperatorsResult, ok = r.CompiledOperators.Execute(finalEvent, r.Match, r.Extract)

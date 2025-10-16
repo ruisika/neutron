@@ -1,7 +1,7 @@
 package executer
 
 import (
-	"fmt"
+	"encoding/base64"
 	"strconv"
 	"strings"
 
@@ -102,7 +102,7 @@ func (e *Executer) Execute(input *protocols.ScanContext) (*operators.Result, err
 	return result, nil
 }
 
-// HTTPPacketResult 包含还原后的完整请求和响应包，以及执行时间。
+// HTTPPacketResult 包含还原后的完整请求和响应包（base64编码），以及执行时间。
 type HTTPPacketResult struct {
 	RequestPacket  string
 	ResponsePacket string
@@ -117,8 +117,8 @@ func ReconstructHTTPPacket(event map[string]interface{}) HTTPPacketResult {
 		executionTime = event["duration"].(string)
 	}
 	result := HTTPPacketResult{
-		RequestPacket:  "Error: Request packet could not be reconstructed.",
-		ResponsePacket: "Error: Response packet could not be reconstructed.",
+		RequestPacket:  base64.StdEncoding.EncodeToString([]byte("Error: Request packet could not be reconstructed.")),
+		ResponsePacket: base64.StdEncoding.EncodeToString([]byte("Error: Response packet could not be reconstructed.")),
 		ExecutionTime:  executionTime,
 	}
 
@@ -149,7 +149,7 @@ func ReconstructHTTPPacket(event map[string]interface{}) HTTPPacketResult {
 			requestBuilder.WriteString("\r\n\r\n")
 		}
 
-		result.RequestPacket = requestBuilder.String()
+		result.RequestPacket = base64.StdEncoding.EncodeToString([]byte(requestBuilder.String()))
 	}
 
 	// --- 2. 还原响应包 (Response Packet) ---
@@ -157,9 +157,6 @@ func ReconstructHTTPPacket(event map[string]interface{}) HTTPPacketResult {
 	// 2.1 提取响应状态行和响应体
 	responseStatusLine, okResp := event["response"].(string)
 	responseBody, okRespBody := event["respbody"].(string)
-
-	// 健壮性增强：如果不是 map[string][]string，则尝试 map[string]interface{}
-	var headersMap map[string][]string
 
 	if okResp {
 		responseBuilder := strings.Builder{}
@@ -170,21 +167,6 @@ func ReconstructHTTPPacket(event map[string]interface{}) HTTPPacketResult {
 		responseBuilder.WriteString(responseStatusLine)
 		responseBuilder.WriteString("\r\n") // 添加 CRLF
 
-		// 拼接头部
-		if headersMap != nil {
-			keys := make([]string, 0, len(headersMap))
-			for k := range headersMap {
-				keys = append(keys, k)
-			}
-
-			for _, key := range keys {
-				values := headersMap[key]
-				value := strings.Join(values, ", ")
-				// 再次格式化为标准的 HTTP 头部 Key: Value
-				responseBuilder.WriteString(fmt.Sprintf("%s: %s\r\n", strings.Title(strings.ToLower(key)), value))
-			}
-		}
-
 		// 头部和正文分隔符
 		responseBuilder.WriteString("\r\n")
 
@@ -193,7 +175,7 @@ func ReconstructHTTPPacket(event map[string]interface{}) HTTPPacketResult {
 			responseBuilder.WriteString(strings.TrimSpace(responseBody))
 		}
 
-		result.ResponsePacket = responseBuilder.String()
+		result.ResponsePacket = base64.StdEncoding.EncodeToString([]byte(responseBuilder.String()))
 	}
 
 	return result
